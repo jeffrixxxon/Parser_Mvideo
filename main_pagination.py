@@ -8,8 +8,9 @@ from config import headers, cookies
 
 
 def get_data():
+    category_id = input('Введите искомую категорию:')
     params = {
-        'categoryId': '205',
+        'categoryId': category_id,
         'offset': '0',
         'limit': '24',
         'filterParams': [
@@ -41,7 +42,7 @@ def get_data():
         offset = f'{i * 24}'
 
         params = {
-            'categoryId': '205',
+            'categoryId': category_id,
             'offset': offset,
             'limit': '24',
             'filterParams': [
