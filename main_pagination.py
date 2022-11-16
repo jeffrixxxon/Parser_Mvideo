@@ -4,13 +4,45 @@ import time
 import requests
 import os
 import math
+from telebot import types, TeleBot
 from config import headers, cookies
+from auth_data import token
 
 
-def get_data():
-    category_id = input('Введите искомую категорию:')
+def telegram_bot(message):
+
+    bot = TeleBot(token)
+
+    @bot.message_handler(commands=["start"])
+    def start(message):
+
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        btn_1 = types.KeyboardButton('Запуск парсера') # -> get_data
+        btn_2 = types.KeyboardButton("Получение всех позиций товаров")
+        markup.add(btn_1, btn_2)
+        bot.send_message(message.chat.id, text="{0.first_name} ! Добро пожаловать в MvideoParserBot!".format(message.from_user), reply_markup=markup)
+
+    @bot.message_handler(content_types=["text"])
+    def read_text_info(message):
+        if (message.text == 'Запуск парсера'):
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            btn_smart = types.KeyboardButton("Смартфоны")
+            btn_tele = types.KeyboardButton("Телевизоры")
+            back = types.KeyboardButton("Вернуться в главное меню")
+            markup.add(btn_smart, btn_tele, back)
+            bot.send_message(message.chat.id, 'Выбери категорию', reply_markup=markup)
+            
+        elif (message.text == 'Вернуться в главное меню'):
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            btn_1 = types.KeyboardButton("Запуск парсера")
+            btn_2 = types.KeyboardButton("Получение всех позиций товаров")
+            markup.add(btn_1, btn_2)
+            bot.send_message(message.chat.id, text="Вы вернулись в главное меню", reply_markup=markup)
+    bot.polling(none_stop=True)
+
+
+def get_data(category_id):
     try:
-
         params = {
             'categoryId': category_id,
             'offset': '0',
@@ -114,6 +146,7 @@ def get_data():
             json.dump(products_description, file, indent=4, ensure_ascii=False)
         with open('data/3_product_prices.json', 'w') as file:
             json.dump(products_prices, file, indent=4, ensure_ascii=False)
+        return 'Complete'
     except TypeError:
         print(f"Введена некорректная категория: {category_id}")
         get_data()
@@ -144,7 +177,7 @@ def get_result():
 
 
 def main():
-    pass
+    telegram_bot(token)
     # get_data()
     # if input('[+]Сформировать отчет по все товарам?(YES / NO)').lower() in ('yes', 'да'):
     #     get_result()
