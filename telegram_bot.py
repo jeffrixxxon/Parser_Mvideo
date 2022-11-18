@@ -14,7 +14,6 @@ dp = Dispatcher(bot)
 
 @dp.message_handler(commands='start', )
 async def start(message: types.Message):
-	await message.answer_sticker('CAACAgIAAxkBAAEGdt5jd9O4vqO-FW4cHS8j323NlAsbWwACaBkAApdqcUlAfgqlRPoT-ysE')
 	await message.answer(f'Hello, {message.from_user.first_name}! 👋🏻')
 	start_buttons = ['Go parsing! 👾']
 	keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -39,14 +38,14 @@ async def category(message: types.Message):
 @dp.message_handler(Text(equals=['Smartphones 📱', 'Tablets 📲', 'Laptops 💻', 'Televisions 📺']))
 async def parsing(message: types.Message):
 	data_category = {'Smartphones 📱': '205', 'Tablets 📲': '195', 'Laptops 💻': '118', 'Televisions 📺': '1', }
-	await message.answer('Please waiting...parsing procedure...')
+	await message.answer('Please waiting... parsing procedure...')
 	get_data(data_category[message.text])
 	print('[!]Parsing complete')
+	print(f'{message.from_user.first_name} parsit!')
 	await message.answer('Complete ✅')
 	start_buttons = [str(i) for i in range(10, 100, 10)]
 	keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 	keyboard.add(*start_buttons)
-	await message.answer_sticker('CAACAgIAAxkBAAEGduBjd9REq0xZhGEpoJHPMOUpxQ-ZOAACNgEAAlwMcht-ZJylPsmgiCsE')
 	await message.answer('Enter the tracked discount $$$', reply_markup=keyboard, )
 
 
@@ -66,10 +65,13 @@ async def search_sale(message: types.Message):
 		       f"Base price: {base_price}\n" \
 		       f"Discounted price: {sale_price}\n" \
 		       f"Discount: {int(abs((sale_price / base_price) * 100 - 100))}%"
+		if message.text == 'Stop 🔚':
+			await stop(message)
 		if abs((sale_price / base_price) * 100 - 100) > int(message.text):
 			time.sleep(2)
 			await message.answer(card)
 			cnt += 1
+
 	if cnt == 0:
 		await message.answer('No items 😟')
 	if message.text == 'Restart 🔙':
