@@ -31,7 +31,7 @@ def get_data(category_id):
         return '[!] No items'
 
     pages_count = math.ceil(total_items / 24)
-    print(f"[!]Total pages: {pages_count}\n[!]Total items: {total_items}")
+    print(f"[INFO]Total pages: {pages_count}\n[INFO]Total items: {total_items}")
 
     products_prices = {}
 
@@ -48,7 +48,6 @@ def get_data(category_id):
             ],
             'doTranslit': 'true',
         }
-        session_id = requests.Session()
         response = session_id.get('https://www.mvideo.ru/bff/products/listing', params=params, cookies=cookies,
                                   headers=headers).json()
         products_ids_list = response.get('body').get('products')
