@@ -2,7 +2,7 @@ import json
 import logging
 import time
 
-from main_pagination import get_data
+from main_pagination import get_data, get_result
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher.filters import Text
 from auth_data import token, category_dict, category_list, generate_numbers
@@ -41,7 +41,9 @@ async def parsing(message: types.Message):
 	if message.text != 'View sale 😏':
 		await message.answer('Please waiting... parsing procedure...')
 		print(f'[INFO] {message.from_user.first_name} connected!')
-		get_data(data_category[message.text])
+		print(message)
+		# get_data(data_category[message.text])
+		# get_result()
 		print('[!]Parsing complete')
 		await message.answer('Complete ✅')
 		time.sleep(1)
@@ -63,27 +65,21 @@ async def event_handler(message: types.Message):
 
 @dp.message_handler(Text(equals=['Restart 🔙']))
 async def search_sale(message: types.Message, num):
-	with open('data/result_prices.json') as file:
+	with open('data/result.json.json') as file:
 		reader = json.load(file)
 	cnt = 0
-	for key, val in reader.items():
+	for elem in reader.items():
+		data = elem.get('body').get('product')
+		card = f"Product id: {data.get('productId')}\n" \
+		       f"Name product: {data.get('name')}\n" \
+		       f"Item base price: {data.get('item_basePrice')}\n" \
+		       f"Item sale price: {data.get('item_salePrice')}\n" \
+		       f"Item bonus: {data.get('item_bonus')}\n" \
+		       f"Item sale: {data.get('item_sale')}\n" \
+		       f"Item link: {data.get('item_link')}"
 
-		# elif message.text is 'Restart 🔙':
-		# 	await category(message.text)
-		# 	break
-		base_price = val.get('item_basePrice')
-		sale_price = val.get('item_salePrice')
-		card = f"Article number: {key}\n" \
-		       f"Base price: {base_price} Руб.\n" \
-		       f"Discounted price: {sale_price} Руб.\n" \
-		       f"Discount: {int(abs((sale_price / base_price) * 100 - 100))}%"
-		if int(num) <= abs((sale_price / base_price) * 100 - 100) <= int(num) + 10:
-			time.sleep(2)
+		if int(message.text) <= data.get('item_sale') < int(message.text) + 10:
 			await message.answer(card)
-			cnt += 1
-		elif message.text == 'View sale 😏':
-			await parsing()
-			break
 	if cnt == 0:
 		await message.answer('No items 😟')
 	else:
