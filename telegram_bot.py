@@ -5,7 +5,7 @@ import time
 from main_pagination import get_data, get_result
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher.filters import Text
-from auth_data import token, category_dict, category_list, generate_numbers
+from auth_data import token
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=token, parse_mode=types.ParseMode.HTML)
@@ -21,65 +21,62 @@ async def start(message: types.Message):
 	await message.answer('Choose a parsing mod 🤌🏻', reply_markup=keyboard)
 
 
-@dp.message_handler(Text(equals=['Go parsing! 👾', 'Restart 🔙']))
+@dp.message_handler(Text(equals=['Go parsing! 👾', 'Back 🔙']))
 async def category(message: types.Message):
-	start_buttons = category_list
+	start_buttons = ['Smartphones 📱', 'Tablets 📲', 'Laptops 💻', 'Televisions 📺', 'Refrigerators 🚪', 'Washing machines 🧼', 'View sale 😏']
 	keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 	keyboard.add(*start_buttons)
 
-	await message.answer('Choose a category 🗿', reply_markup=keyboard, )
+	await message.answer('Choose a category 🗿', reply_markup=keyboard)
 
 
 @dp.message_handler(Text(equals=['View sale 😏']))
-@dp.message_handler(Text(equals=category_list))
+@dp.message_handler(Text(equals=['Smartphones 📱', 'Tablets 📲', 'Laptops 💻', 'Televisions 📺', 'Refrigerators 🚪', 'Washing machines 🧼']))
 async def parsing(message: types.Message):
-	data_category = category_dict
-	start_buttons = generate_numbers
+	data_category = {'Smartphones 📱': '205', 'Tablets 📲': '195', 'Laptops 💻': '118', 'Televisions 📺': '1',
+	                 'Refrigerators 🚪': '159', 'Washing machines 🧼': '89'}
+	start_buttons = [*[str(i) for i in range(10, 100, 10)], 'Back 🔙']
 	keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 	keyboard.add(*start_buttons)
-
 	if message.text != 'View sale 😏':
 		await message.answer('Please waiting... parsing procedure...')
 		print(f'[INFO] {message.from_user.first_name} connected!')
-		print(message)
-		# get_data(data_category[message.text])
-		# get_result()
+		get_data(data_category[message.text])
+		get_result()
 		print('[!]Parsing complete')
 		await message.answer('Complete ✅')
-		time.sleep(1)
 		await message.answer('Enter the tracked discount 💲💲💲', reply_markup=keyboard, )
 	else:
 		await message.answer('Complete ✅')
-		time.sleep(1)
 		await message.answer('Enter the tracked discount 💲💲💲', reply_markup=keyboard, )
 
 
-@dp.message_handler(Text(equals=generate_numbers))
+@dp.message_handler(Text(equals=[str(i) for i in range(10, 100, 10)]))
 async def event_handler(message: types.Message):
-	start_buttons = ['View sale 😏', 'Restart 🔙']
+	start_buttons = ['View sale 😏', 'Back 🔙']
 	keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 	keyboard.add(*start_buttons)
 	await message.answer('Complete ✅', reply_markup=keyboard)
 	await search_sale(message)
 
 
-@dp.message_handler(Text(equals=['Restart 🔙']))
-async def search_sale(message: types.Message, num):
-	with open('data/result.json.json') as file:
+@dp.message_handler(Text(equals=['Back 🔙']))
+async def search_sale(message: types.Message):
+	with open('data/result.json') as file:
 		reader = json.load(file)
 	cnt = 0
-	for elem in reader.items():
-		data = elem.get('body').get('product')
-		card = f"Product id: {data.get('productId')}\n" \
-		       f"Name product: {data.get('name')}\n" \
-		       f"Item base price: {data.get('item_basePrice')}\n" \
-		       f"Item sale price: {data.get('item_salePrice')}\n" \
-		       f"Item bonus: {data.get('item_bonus')}\n" \
-		       f"Item sale: {data.get('item_sale')}\n" \
-		       f"Item link: {data.get('item_link')}"
-
-		if int(message.text) <= data.get('item_sale') < int(message.text) + 10:
+	for key, val in reader.items():
+		card = f'Name: {val["item_name"]}\n' \
+		       f'Article: {key}\n' \
+		       f'Base price: {val["item_basePrice"]} Руб.\n' \
+		       f'Sale price: {val["item_salePrice"]} Руб.\n' \
+		       f'Sale: {val["item_sale"]} %\n' \
+		       f'Bonus: {val["item_bonus"]} ББ\n' \
+		       f'Link: {val["item_link"]}'
+		if int(message.text) <= val["item_sale"] < int(message.text) + 10:
 			await message.answer(card)
+			cnt += 1
+			time.sleep(2)
 	if cnt == 0:
 		await message.answer('No items 😟')
 	else:

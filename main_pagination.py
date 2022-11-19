@@ -33,7 +33,6 @@ def get_data(category_id):
 
     pages_count = math.ceil(total_items / 24)
     print(f'[INFO]Total pages: {pages_count}')
-    products_ids = {}
     products_description = {}
     products_prices = {}
 
@@ -55,8 +54,6 @@ def get_data(category_id):
                                   headers=headers).json()
 
         products_ids_list = response.get('body').get('products')
-        products_ids[i] = products_ids_list
-
         json_data = {
             'productIds': products_ids_list,
             'mediaTypes': [
@@ -76,7 +73,18 @@ def get_data(category_id):
 
         response = session_id.post('https://www.mvideo.ru/bff/product-details/list', cookies=cookies,
                                    headers=headers, json=json_data).json()
-        products_description[i] = response
+
+        material_description = response.get('body').get('products')
+        for item in material_description:
+            item_id = item.get('productId')
+            item_name = item.get('name')
+            item_name_translate = item.get('nameTranslit')
+
+            products_description[item_id] = {
+                'item_name': item_name,
+                'item_link': f"https://www.mvideo.ru/products/{item.get('nameTranslit')}-{item_id}"
+            }
+
         products_ids_str = ','.join(products_ids_list)
 
         params = {
@@ -89,7 +97,6 @@ def get_data(category_id):
                                   headers=headers).json()
 
         material_prices = response.get('body').get('materialPrices')
-
         for item in material_prices:
             item_id = item.get('price').get('productId')
             item_base_price = item.get('price').get('basePrice')
@@ -103,8 +110,6 @@ def get_data(category_id):
             }
 
         print(f'[+] Uploaded {i + 1} pages out of {pages_count}.')
-    # with open('data/1_product_ids.json', 'w') as file:
-    #     json.dump(products_ids, file, indent=4, ensure_ascii=False)
     with open('data/product_description.json', 'w') as file:
             json.dump(products_description, file, indent=4, ensure_ascii=False)
     with open('data/product_prices.json', 'w') as file:
@@ -116,28 +121,21 @@ def get_result():
         products_data = json.load(file)
     with open('data/product_prices.json') as file:
         products_prices = json.load(file)
-
-    for items in products_data.values():
-        products = items.get('body').get('products')
+    for key, val in products_data.items():
         prices = {}
-        for item in products:
-            product_id = item.get('productId')
-
-            if product_id in products_prices:
-                prices = products_prices[product_id]
-
-            item['item_basePrice'] = prices.get('item_basePrice')
-            item['item_salePrice'] = prices.get('item_salePrice')
-            item['item_bonus'] = prices.get('item_bonus')
-            item['item_sale'] = int(abs((prices.get('item_salePrice') / prices.get('item_basePrice')) * 100 - 100))
-            item['item_link'] = f"https://www.mvideo.ru/products/{item.get('nameTranslit')}-{product_id}"
+        if key in products_prices:
+            prices = products_prices[key]
+        val['item_basePrice'] = prices['item_basePrice']
+        val['item_salePrice'] = prices['item_salePrice']
+        val['item_bonus'] = prices['item_bonus']
+        val['item_sale'] = int(abs((prices['item_salePrice'] / prices['item_basePrice']) * 100 - 100))
 
     with open('data/result.json', 'w') as file:
         json.dump(products_data, file, indent=4, ensure_ascii=False)
 
 
 def main():
-    get_data()
+    get_data('1')
     get_result()
 
 
