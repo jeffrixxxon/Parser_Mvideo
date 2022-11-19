@@ -1,7 +1,6 @@
 import json
 import logging
 import time
-import asyncio
 
 from main_pagination import get_data
 from aiogram import Bot, Dispatcher, executor, types
