@@ -1,10 +1,12 @@
 import json
 import logging
+import os
 import time
 
-from main_pagination import get_data, get_result
+from main_pagination import get_data
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher.filters import Text
+from aiogram.utils.markdown import hlink
 from auth_data import token
 
 logging.basicConfig(level=logging.INFO)
@@ -31,7 +33,7 @@ async def category(message: types.Message):
 
 
 @dp.message_handler(Text(equals=['View sale 😏']))
-@dp.message_handler(Text(equals=['Smartphones 📱', 'Tablets 📲', 'Laptops 💻', 'Televisions 📺', 'Refrigerators 🚪', 'Washing machines 🧼']))
+@dp.message_handler(Text(equals=['Smartphones 📱', 'Tablets 📲', 'Laptops 💻', 'Televisions 📺', 'Refrigerators 🚪', 'Washing machines 🧼', 'View sale 😏']))
 async def parsing(message: types.Message):
 	data_category = {'Smartphones 📱': '205', 'Tablets 📲': '195', 'Laptops 💻': '118', 'Televisions 📺': '1',
 	                 'Refrigerators 🚪': '159', 'Washing machines 🧼': '89'}
@@ -41,8 +43,11 @@ async def parsing(message: types.Message):
 	if message.text != 'View sale 😏':
 		await message.answer('Please waiting... parsing procedure...')
 		print(f'[INFO] {message.from_user.first_name} connected!')
-		get_data(data_category[message.text])
-		get_result()
+		try:
+			os.remove(f'data/{message.from_user.first_name}_result.json')
+		except FileNotFoundError:
+			pass
+		get_data(data_category[message.text], message.from_user.first_name)
 		print('[!]Parsing complete')
 		await message.answer('Complete ✅')
 		await message.answer('Enter the tracked discount 💲💲💲', reply_markup=keyboard, )
@@ -62,18 +67,17 @@ async def event_handler(message: types.Message):
 
 @dp.message_handler(Text(equals=['Back 🔙']))
 async def search_sale(message: types.Message):
-	with open('data/result.json') as file:
+	with open(f'data/{message.from_user.first_name}_result.json') as file:
 		reader = json.load(file)
 	cnt = 0
 	for key, val in reader.items():
-		card = f'Name: {val["item_name"]}\n' \
-		       f'Article: {key}\n' \
-		       f'Base price: {val["item_basePrice"]} Руб.\n' \
-		       f'Sale price: {val["item_salePrice"]} Руб.\n' \
-		       f'Sale: {val["item_sale"]} %\n' \
-		       f'Bonus: {val["item_bonus"]} ББ\n' \
-		       f'Link: {val["item_link"]}'
 		if int(message.text) <= val["item_sale"] < int(message.text) + 10:
+			card = f'{hlink(val["item_name"], val["item_link"])}\n' \
+			       f'Article: {key}\n' \
+			       f'Base price: {val["item_basePrice"]} Руб.\n' \
+			       f'Sale price: {val["item_salePrice"]} Руб.\n' \
+			       f'Bonus: {val["item_bonus"]} ББ\n' \
+			       f'Sale: {val["item_sale"]} %\n\n'
 			await message.answer(card)
 			cnt += 1
 			time.sleep(2)

@@ -7,7 +7,7 @@ import math
 from config import headers, cookies
 
 
-def get_data(category_id):
+def get_data(category_id, user_name):
     params = {
         'categoryId': category_id,
         'offset': '0',
@@ -18,7 +18,6 @@ def get_data(category_id):
         ],
         'doTranslit': 'true',
     }
-
     if not os.path.exists('data'):
         os.mkdir('data')
     session_id = requests.Session()
@@ -35,10 +34,11 @@ def get_data(category_id):
     print(f'[INFO]Total pages: {pages_count}')
     products_description = {}
     products_prices = {}
+    result_parsing = {}
 
     for i in range(pages_count):
-        offset = f'{i * 24}'
         time.sleep(random.randrange(1, 2))
+        offset = f'{i * 24}'
         params = {
             'categoryId': category_id,
             'offset': offset,
@@ -97,6 +97,7 @@ def get_data(category_id):
                                   headers=headers).json()
 
         material_prices = response.get('body').get('materialPrices')
+
         for item in material_prices:
             item_id = item.get('price').get('productId')
             item_base_price = item.get('price').get('basePrice')
@@ -110,33 +111,20 @@ def get_data(category_id):
             }
 
         print(f'[+] Uploaded {i + 1} pages out of {pages_count}.')
-    with open('data/product_description.json', 'w') as file:
-            json.dump(products_description, file, indent=4, ensure_ascii=False)
-    with open('data/product_prices.json', 'w') as file:
-            json.dump(products_prices, file, indent=4, ensure_ascii=False)
-
-
-def get_result():
-    with open('data/product_description.json') as file:
-        products_data = json.load(file)
-    with open('data/product_prices.json') as file:
-        products_prices = json.load(file)
-    for key, val in products_data.items():
+    for key, val in products_description.items():
         prices = {}
         if key in products_prices:
             prices = products_prices[key]
-        val['item_basePrice'] = prices['item_basePrice']
-        val['item_salePrice'] = prices['item_salePrice']
-        val['item_bonus'] = prices['item_bonus']
-        val['item_sale'] = int(abs((prices['item_salePrice'] / prices['item_basePrice']) * 100 - 100))
-
-    with open('data/result.json', 'w') as file:
-        json.dump(products_data, file, indent=4, ensure_ascii=False)
+            val['item_basePrice'] = prices['item_basePrice']
+            val['item_salePrice'] = prices['item_salePrice']
+            val['item_bonus'] = prices['item_bonus']
+            val['item_sale'] = int(abs((prices['item_salePrice'] / prices['item_basePrice']) * 100 - 100))
+    with open(f'data/{user_name}_result.json', 'w') as file:
+        json.dump(products_description, file, ensure_ascii=False)
 
 
 def main():
-    get_data('1')
-    get_result()
+    get_data()
 
 
 if __name__ == '__main__':
