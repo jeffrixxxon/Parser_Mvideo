@@ -1,5 +1,4 @@
 import json
-import random
 import time
 import requests
 import os
@@ -34,10 +33,9 @@ def get_data(category_id, user_name):
     print(f'[INFO]Total pages: {pages_count}')
     products_description = {}
     products_prices = {}
-    result_parsing = {}
 
     for i in range(pages_count):
-        time.sleep(random.randrange(1, 2))
+        time.sleep(1)
         offset = f'{i * 24}'
         params = {
             'categoryId': category_id,
@@ -82,7 +80,7 @@ def get_data(category_id, user_name):
 
             products_description[item_id] = {
                 'item_name': item_name,
-                'item_link': f"https://www.mvideo.ru/products/{item.get('nameTranslit')}-{item_id}"
+                'item_link': f"https://www.mvideo.ru/products/{item_name_translate}-{item_id}"
             }
 
         products_ids_str = ','.join(products_ids_list)

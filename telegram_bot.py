@@ -7,7 +7,7 @@ from main_pagination import get_data
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher.filters import Text
 from aiogram.utils.markdown import hlink
-from auth_data import token
+from auth_data import token, sales_numbers
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=token, parse_mode=types.ParseMode.HTML)
@@ -37,7 +37,7 @@ async def category(message: types.Message):
 async def parsing(message: types.Message):
 	data_category = {'Smartphones 📱': '205', 'Tablets 📲': '195', 'Laptops 💻': '118', 'Televisions 📺': '1',
 	                 'Refrigerators 🚪': '159', 'Washing machines 🧼': '89'}
-	start_buttons = [*[str(i) for i in range(10, 100, 10)], 'Back 🔙']
+	start_buttons = [*sales_numbers, 'Back 🔙']
 	keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 	keyboard.add(*start_buttons)
 	if message.text != 'View sale 😏':
@@ -56,7 +56,7 @@ async def parsing(message: types.Message):
 		await message.answer('Enter the tracked discount 💲💲💲', reply_markup=keyboard, )
 
 
-@dp.message_handler(Text(equals=[str(i) for i in range(10, 100, 10)]))
+@dp.message_handler(Text(equals=sales_numbers))
 async def event_handler(message: types.Message):
 	start_buttons = ['View sale 😏', 'Back 🔙']
 	keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -80,7 +80,7 @@ async def search_sale(message: types.Message):
 			       f'Sale: {val["item_sale"]} %\n\n'
 			await message.answer(card)
 			cnt += 1
-			time.sleep(2)
+			time.sleep(1)
 	if cnt == 0:
 		await message.answer('No items 😟')
 	else:
