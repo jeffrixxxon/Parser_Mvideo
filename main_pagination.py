@@ -17,8 +17,10 @@ def get_data(category_id, user_name):
         ],
         'doTranslit': 'true',
     }
+
     if not os.path.exists('data'):
         os.mkdir('data')
+
     session_id = requests.Session()
 
     response = session_id.get('https://www.mvideo.ru/bff/products/listing', params=params, cookies=cookies,
@@ -109,6 +111,7 @@ def get_data(category_id, user_name):
             }
 
         print(f'[+] Uploaded {i + 1} pages out of {pages_count}.')
+
     for key, val in products_description.items():
         prices = {}
         if key in products_prices:
