@@ -10,6 +10,9 @@ from config import headers, cookies
 def get_site_parsing_data(category_id: str, user_name: str) -> typing.NoReturn:
     """Requesting information from the site and processing"""
 
+    if not os.path.exists('data'):
+        os.mkdir('data')
+
     params = {
         'categoryId': category_id,
         'offset': '0',
@@ -20,9 +23,6 @@ def get_site_parsing_data(category_id: str, user_name: str) -> typing.NoReturn:
         ],
         'doTranslit': 'true',
     }
-
-    if not os.path.exists('data'):
-        os.mkdir('data')
 
     session_id = requests.Session()
 
@@ -36,7 +36,9 @@ def get_site_parsing_data(category_id: str, user_name: str) -> typing.NoReturn:
         return '[!] No items'
 
     pages_count = math.ceil(total_items / 24)
+
     print(f'[INFO]Total pages: {pages_count}')
+
     products_description = {}
     products_prices = {}
 
@@ -52,6 +54,7 @@ def get_site_parsing_data(category_id: str, user_name: str) -> typing.NoReturn:
             ],
             'doTranslit': 'true',
         }
+
         time.sleep(1)
         response = session_id.get('https://www.mvideo.ru/bff/products/listing', params=params, cookies=cookies,
                                   headers=headers).json()

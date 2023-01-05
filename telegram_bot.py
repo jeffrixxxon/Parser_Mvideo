@@ -38,7 +38,7 @@ async def category(message: types.Message):
 @dp.message_handler(Text(equals=['View sale']))
 @dp.message_handler(Text(equals=buttons_search))
 async def parsing(message: types.Message):
-	"""Parse the entered category and returns the result of the 'get_data' function"""
+	"""Parse the entered category and returns the result of the 'get_site_parsing_data' function"""
 
 	data_category = data_base_category
 	start_buttons = [*sales_numbers, 'Back']
@@ -72,7 +72,7 @@ async def event_handler(message: types.Message):
 
 
 async def search_sale(message: types.Message):
-	"""Checking the result of the 'get_data' function for the selected discount"""
+	"""Checking the result of the 'get_site_parsing_data' function for the selected discount"""
 
 	with open(f'data/{message.from_user.first_name}_result.json') as file:
 		reader = json.load(file)
