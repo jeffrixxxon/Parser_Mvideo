@@ -1,12 +1,15 @@
+import os
 import json
 import time
-import requests
-import os
 import math
+import typing
+import requests
 from config import headers, cookies
 
 
-def get_data(category_id, user_name):
+def get_site_parsing_data(category_id: str, user_name: str) -> typing.NoReturn:
+    """Requesting information from the site and processing"""
+
     params = {
         'categoryId': category_id,
         'offset': '0',
@@ -28,6 +31,7 @@ def get_data(category_id, user_name):
 
     total_items = response.get('body').get('total')
     print(f'[INFO]Total items: {total_items}')
+
     if total_items is None:
         return '[!] No items'
 
@@ -36,9 +40,8 @@ def get_data(category_id, user_name):
     products_description = {}
     products_prices = {}
 
-    for i in range(pages_count):
-        time.sleep(1)
-        offset = f'{i * 24}'
+    for page in range(pages_count):
+        offset = f'{page * 24}'
         params = {
             'categoryId': category_id,
             'offset': offset,
@@ -49,7 +52,7 @@ def get_data(category_id, user_name):
             ],
             'doTranslit': 'true',
         }
-
+        time.sleep(1)
         response = session_id.get('https://www.mvideo.ru/bff/products/listing', params=params, cookies=cookies,
                                   headers=headers).json()
 
@@ -110,23 +113,20 @@ def get_data(category_id, user_name):
                 'item_bonus': item_bonus
             }
 
-        print(f'[+] Uploaded {i + 1} pages out of {pages_count}.')
+        print(f'[+] Uploaded {page + 1} pages out of {pages_count}.')
 
-    for key, val in products_description.items():
-        prices = {}
-        if key in products_prices:
-            prices = products_prices[key]
-            val['item_basePrice'] = prices['item_basePrice']
-            val['item_salePrice'] = prices['item_salePrice']
-            val['item_bonus'] = prices['item_bonus']
-            val['item_sale'] = int(abs((prices['item_salePrice'] / prices['item_basePrice']) * 100 - 100))
+    creating_final_file(products_description, products_prices, user_name)
+
+
+def creating_final_file(products_description: dict, products_prices: dict, user_name: str) -> typing.NoReturn:
+    """Accepts parsing results, creates a file"""
+
+    for key_article, product in products_description.items():
+        if key_article in products_prices:
+            prices = products_prices[key_article]
+            product['item_basePrice'] = prices['item_basePrice']
+            product['item_salePrice'] = prices['item_salePrice']
+            product['item_bonus'] = prices['item_bonus']
+            product['item_sale'] = int(abs((prices['item_salePrice'] / prices['item_basePrice']) * 100 - 100))
     with open(f'data/{user_name}_result.json', 'w') as file:
-        json.dump(products_description, file, ensure_ascii=False)
-
-
-def main():
-    get_data()
-
-
-if __name__ == '__main__':
-    main()
+        json.dump(products_description, file, indent=4, ensure_ascii=False)
