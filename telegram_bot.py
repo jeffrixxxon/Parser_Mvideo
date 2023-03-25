@@ -50,7 +50,7 @@ async def parsing(message: types.Message):
 		try:
 			os.remove(f'data/{message.from_user.first_name}_result.json')
 		except FileNotFoundError:
-			pass
+			print("[-]User not found!")
 
 		get_site_parsing_data(data_category[message.text], message.from_user.first_name)
 		print('[INFO]Parsing complete')
