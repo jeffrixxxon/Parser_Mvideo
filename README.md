@@ -7,11 +7,17 @@
 - Введите в терминале:
 <div>
     
-    >>> git clone https://github.com/jeffrixxxon/Parser_Mvideo.git
+    git clone https://github.com/jeffrixxxon/Parser_Mvideo.git
     
-    >>> cd Parser_Mvideo
-
-    >>> pip install -r requirements.txt
+</div>
+<div>
+    
+    cd Parser_Mvideo
+    
+<div>
+    
+    pip install -r requirements.txt
+    
 </div>
 
 - Создайте файл:
@@ -33,6 +39,6 @@
 
 <div>
     
-    >>> python telegram_bot.py
+    python telegram_bot.py
 
 </div>
