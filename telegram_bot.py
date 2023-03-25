@@ -6,8 +6,8 @@ import time
 from aiogram.dispatcher.filters import Text
 from aiogram.utils.markdown import hlink
 from aiogram import Bot, Dispatcher, executor, types
-from main_pagination import get_site_parsing_data
-from auth_data import token, sales_numbers, buttons_search, data_base_category
+from ParsingScript.main_pagination import get_site_parsing_data
+from ParsingScript.auth_data import token, sales_numbers, buttons_search, data_base_category
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=token, parse_mode=types.ParseMode.HTML)

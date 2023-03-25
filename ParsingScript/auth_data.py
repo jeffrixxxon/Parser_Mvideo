@@ -1,4 +1,10 @@
-token = '5958726076:AAEKD-zpL3VMfwd8A9uoJW37icRZdhOMHRA'
+import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+token = os.getenv('TOKEN')
 
 sales_numbers = [str(i) for i in range(10, 100, 10)]
 
