@@ -5,7 +5,7 @@
 - Введите в терминале:
     > git clone <https://github.com/jeffrixxxon/Parser_Mvideo.git>
 
-    > pip install requirements.txt
+    > pip install -r requirements.txt
 
 - Создайте файл:
     > .env
