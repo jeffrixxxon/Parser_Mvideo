@@ -4,7 +4,7 @@ import time
 import math
 import typing
 import requests
-from config import headers, cookies
+from .config import headers, cookies
 
 
 def get_site_parsing_data(category_id: str, user_name: str) -> typing.NoReturn:
