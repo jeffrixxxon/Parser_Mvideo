@@ -4,6 +4,8 @@
 - Создайте проект в виртуальном окружении
 - Введите в терминале:
     > git clone <https://github.com/jeffrixxxon/Parser_Mvideo.git>
+    
+    > cd Parser_Mvideo
 
     > pip install -r requirements.txt
 
